@@ -23,8 +23,9 @@ async def send_telemetry(device, data):
 previous_error = 0
 
 
-async def send_error_event(device, data, twin):
+async def send_error_event(device, data):
     global previous_error
+
     if data['DeviceError'] > previous_error:
         logging.info("sending event")
         msg = Message(json.dumps(data))
@@ -76,17 +77,15 @@ async def main():
 
         root_node = client.get_node('ns=2;s=Device 1')
         data = await get_data(root_node, telemetry_data_nodes)
-        twin = await device_client.get_twin()
-        # send `messages_to_send` messages in parallel
         await send_telemetry(device_client, data)
-        error_data = await get_data(root_node, ['DeviceError'])
-        await send_error_event(device_client, error_data, twin)
+        error_data = await get_data(root_node, ['DeviceError', 'WorkorderId'])
+        await send_error_event(device_client, error_data)
 
         async def set_production_rate_from_twin(patch):
             logging.info(
                 f"the data in the desired properties patch was: {patch}")
             data_node = await root_node.get_child('ProductionRate')
-            await data_node.write_value(ua.root_Variant(patch['ProductionRate'], ua.root_nodeVariantType.Int32))
+            await data_node.write_value(ua.Variant(patch['ProductionRate'], ua.VariantType.Int32))
 
         async def method_request_handler(method_request):
             if method_request.name == "EmergencyStop":
