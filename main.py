@@ -4,10 +4,28 @@ import logging
 import json
 import time
 import uuid
+import os
+import sys
 from azure.iot.device.aio import IoTHubDeviceClient
 from azure.iot.device import Message, MethodResponse
 from datetime import datetime
 from asyncua import Client, ua
+from dotenv import load_dotenv
+
+
+def load_settings():
+    load_dotenv('settings.env')
+    url_ua = os.getenv('URL_UA')
+    try:
+        device_id = sys.argv[1]
+    except IndexError:
+        print("You did not specify a device")
+        sys.exit(1)
+    conn_str = os.getenv(device_id)
+    if not conn_str:
+        print("Connection string for this device not found")
+        sys.exit(1)
+    return url_ua, device_id, conn_str
 
 
 async def send_telemetry(device, data):
@@ -56,27 +74,26 @@ async def update_reported_twin(device, data):
     await device.patch_twin_reported_properties(data)
 
 
-telemetry_data_nodes = ['ProductionStatus', 'WorkorderId', 'GoodCount',
+TELEMETRY_DATA_NODES = ['ProductionStatus', 'WorkorderId', 'GoodCount',
                         'BadCount', 'Temperature']
-twin_data_nodes = ['ProductionRate', 'DeviceError']
-conn_str = ''
-url = "opc.tcp://localhost:4840/"
+TWIN_DATA_NODES = ['ProductionRate', 'DeviceError']
 
 
 async def main():
+    url_ua, device_id, conn_str = load_settings()
     device_client = IoTHubDeviceClient.create_from_connection_string(
         conn_str)
 
     # Connect the client.
     await device_client.connect()
     # Connect to ua server
-    client = Client(url=url)
+    client = Client(url=url_ua)
     await client.connect()
 
     while True:
 
-        root_node = client.get_node('ns=2;s=Device 1')
-        data = await get_data(root_node, telemetry_data_nodes)
+        root_node = client.get_node(f'ns=2;s=Device {device_id}')
+        data = await get_data(root_node, TELEMETRY_DATA_NODES)
         await send_telemetry(device_client, data)
         error_data = await get_data(root_node, ['DeviceError', 'WorkorderId'])
         await send_error_event(device_client, error_data)
@@ -113,7 +130,7 @@ async def main():
 
         device_client.on_method_request_received = method_request_handler
         device_client.on_twin_desired_properties_patch_received = set_production_rate_from_twin
-        twin_data = await get_data(root_node, twin_data_nodes)
+        twin_data = await get_data(root_node, TWIN_DATA_NODES)
 
         await update_reported_twin(device_client, twin_data)
 
