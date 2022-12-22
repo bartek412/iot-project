@@ -1,0 +1,58 @@
+SELECT
+    IotHub.ConnectionDeviceId,
+    AVG(Temperature) as 'Avg Temperature',
+    MAX(Temperature) as 'Max Temperature',
+    MIN(Temperature) as 'Min Temperature' INTO [temperature-out]
+FROM
+    [iot-hub]
+GROUP BY
+    IotHub.ConnectionDeviceId,
+    TumblingWindow(minute, 5)
+
+SELECT
+    IotHub.ConnectionDeviceId,
+    (MAX(GoodCount) - MIN(GoodCount)) /(MAX(GoodCount) - MIN(GoodCount) + MAX(BadCount) - MIN(BadCount)) as 'Good Count percentage' INTO [production-kpi-out]
+FROM
+    [iot-hub]
+GROUP BY
+    IotHub.ConnectionDeviceId,
+    TumblingWindow(minute, 15)
+
+SELECT
+    WorkorderId,
+    MAX(GoodCount) as 'Sum of Good Count',
+    MAX(BadCount) as 'Sum of Bad Count' INTO [prod-per-worker-out]
+FROM
+    [iot-hub]
+GROUP BY
+    WorkorderId,
+    TumblingWindow(minute, 5)
+
+SELECT
+    WorkorderId,
+    COUNT(DeviceError) INTO [errors-in-30-out]
+FROM
+    [event-hub-in]
+GROUP BY
+    WorkorderId,
+    TumblingWindow(minute, 30)
+
+SELECT
+    WorkorderId,
+    COUNT(DeviceError) INTO [errors-in-15-out]
+FROM
+    [event-hub-in]
+GROUP BY
+    WorkorderId,
+    TumblingWindow(minute, 10)
+HAVING COUNT(DeviceError) > 3
+
+SELECT
+    IotHub.ConnectionDeviceId,
+    (MAX(GoodCount) - MIN(GoodCount)) /(MAX(GoodCount) - MIN(GoodCount) + MAX(BadCount) - MIN(BadCount)) as 'Good Count percentage' INTO [kpi-que-out]
+FROM
+    [iot-hub]
+GROUP BY
+    IotHub.ConnectionDeviceId,
+    TumblingWindow(minute, 15)
+

@@ -1,0 +1,21 @@
+{
+    "Name": "event-hub-in",
+    "Type": "Data Stream",
+    "DataSourceType": "Event Hub",
+    "EventHubProperties": {
+        "ServiceBusNamespace": "ErrorsEventHub",
+        "EventHubName": "event_hub",
+        "SharedAccessPolicyName": null,
+        "SharedAccessPolicyKey": null,
+        "ConsumerGroupName": "",
+        "AuthenticationMode": "Msi"
+    },
+    "DataSourceCredentialDomain": null,
+    "Serialization": {
+        "Type": "Json",
+        "Encoding": "UTF8"
+    },
+    "PartitionKey": "",
+    "CompressionType": "None",
+    "ScriptType": "Input"
+}

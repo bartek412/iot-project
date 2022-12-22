@@ -1,0 +1,42 @@
+{
+    "name": "asa-job",
+    "startFile": "Transformation.asaql",
+    "configurations": [
+        {
+            "filePath": "JobConfig.json",
+            "subType": "JobConfig"
+        },
+        {
+            "filePath": "Inputs/event-hub-in.json",
+            "subType": "Input"
+        },
+        {
+            "filePath": "Outputs/errors-in-15-out.json",
+            "subType": "Output"
+        },
+        {
+            "filePath": "Outputs/errors-in-30-out.json",
+            "subType": "Output"
+        },
+        {
+            "filePath": "Outputs/prod-per-worker-out.json",
+            "subType": "Output"
+        },
+        {
+            "filePath": "Outputs/production-kpi-out.json",
+            "subType": "Output"
+        },
+        {
+            "filePath": "Outputs/temperature-out.json",
+            "subType": "Output"
+        },
+        {
+            "filePath": "Inputs/iot-hub.json",
+            "subType": "Input"
+        },
+        {
+            "filePath": "Outputs/kpi-que-out.json",
+            "subType": "Output"
+        }
+    ]
+}
