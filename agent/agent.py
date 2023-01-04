@@ -2,7 +2,6 @@
 import asyncio
 import logging
 import json
-import time
 import uuid
 import os
 import sys
@@ -77,9 +76,9 @@ async def get_data(parrent_node, data_nodes):
 async def update_reported_twin(device, data, twin):
     logging.info("Setting reported twin")
     new_twin = {}
-    if data['ProductionRate'] != twin['reported']['ProductionRate']:
+    if 'ProductionRate' not in twin['reported'] or data['ProductionRate'] != twin['reported']['ProductionRate']:
         new_twin['ProductionRate'] = data['ProductionRate']
-    if data['DeviceError'] != twin['reported']['DeviceError']:
+    if 'DeviceError' not in twin['reported'] or data['DeviceError'] != twin['reported']['DeviceError']:
         new_twin['DeviceError'] = data['DeviceError']
     if new_twin:
         await device.patch_twin_reported_properties(data)
@@ -150,7 +149,7 @@ async def main():
 
         await update_reported_twin(device_client, twin_data, twin)
 
-        time.sleep(5)
+        await asyncio.sleep(5)
 
 if __name__ == "__main__":
     logging.basicConfig(level=logging.WARNING)
